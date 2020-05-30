@@ -6,8 +6,7 @@ export type JSONSchema =
   | BooleanSchema
   | ArraySchema
   | UnionSchema
-  | IntegerSchema
-  | IntersectionSchema;
+  | IntegerSchema;
 
 export interface ObjectSchema {
   type: 'object';
@@ -44,9 +43,4 @@ interface ArraySchema {
 
 interface UnionSchema {
   oneOf: JSONSchema[];
-}
-
-interface IntersectionSchema {
-  type: 'object';
-  allOf: JSONSchema[];
 }

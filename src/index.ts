@@ -32,6 +32,40 @@ function createObj(
   return obj;
 }
 
+function createIntersectedObj(
+  schema: t.IntersectionType<t.Mixed[]>,
+  modifiers: Modifiers
+) {
+  const objects: ObjectSchema = schema.types
+    .map((type: any) => {
+      if (type instanceof t.IntersectionType) {
+        return createIntersectedObj(type, modifiers);
+      } else if (type instanceof t.ExactType) {
+        return createObj(type.type, { ...modifiers, exact: true });
+      } else {
+        return createObj(type, modifiers);
+      }
+    })
+    .reduce(
+      (acc: ObjectSchema, obj: ObjectSchema) => {
+        const newOb = {
+          ...acc,
+          required: [...acc.required!, ...(obj.required || [])],
+          properties: { ...acc.properties, ...obj.properties },
+        };
+
+        if (obj.additionalProperties === false) {
+          newOb.additionalProperties = false;
+        }
+
+        return newOb;
+      },
+      { type: 'object', required: [], properties: {} }
+    );
+
+  return objects;
+}
+
 function getRequiredProps(props: t.Props): string[] {
   return Object.entries(props)
     .filter(([_key, value]) => {
@@ -108,10 +142,7 @@ function convertType(schema: t.Mixed, modifiers: Modifiers): JSONSchema {
       return convertType(schema.type, modifiers);
     }
   } else if (schema instanceof t.IntersectionType) {
-    return {
-      type: 'object',
-      allOf: schema.types.map((type: t.Mixed) => convertType(type, modifiers)),
-    };
+    return createIntersectedObj(schema, modifiers);
   }
 
   throw new Error(`Invalid type ${(schema as any)._tag} - ${schema.name}`);

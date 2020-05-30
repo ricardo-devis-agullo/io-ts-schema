@@ -138,16 +138,11 @@ const transformations: Transformations = {
     ]),
     output: {
       type: 'object',
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-          },
-          required: ['name'],
-        },
-        { type: 'object', properties: { age: { type: 'number' } } },
-      ],
+      properties: {
+        name: { type: 'string' },
+        age: { type: 'number' },
+      },
+      required: ['name'],
     },
   },
   'combines partial and strict': {
@@ -157,17 +152,31 @@ const transformations: Transformations = {
     ]),
     output: {
       type: 'object',
-      allOf: [
-        {
-          additionalProperties: false,
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-          },
-          required: ['name'],
-        },
-        { type: 'object', properties: { age: { type: 'number' } } },
-      ],
+      additionalProperties: false,
+      properties: {
+        name: { type: 'string' },
+        age: { type: 'number' },
+      },
+      required: ['name'],
+    },
+  },
+  'combines nested intersections': {
+    input: t.intersection([
+      t.type({ name: t.string }),
+      t.intersection([
+        t.type({ age: t.number }),
+        t.partial({ isAdmin: t.boolean }),
+      ]),
+    ]),
+    output: {
+      type: 'object',
+      required: ['name', 'age'],
+      properties: {
+        name: { type: 'string' },
+
+        age: { type: 'number' },
+        isAdmin: { type: 'boolean' },
+      },
     },
   },
 };
