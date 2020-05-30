@@ -5,8 +5,8 @@ import { JSONSchema } from '../src/types';
 
 interface Transformations {
   [testDescription: string]: {
-    iots: t.Mixed;
-    json: JSONSchema;
+    input: t.Mixed;
+    output: JSONSchema;
   };
 }
 
@@ -22,59 +22,59 @@ const Positive = t.brand(
 
 const transformations: Transformations = {
   'converts strings': {
-    iots: t.string,
-    json: {
+    input: t.string,
+    output: {
       type: 'string',
     },
   },
   'converts null': {
-    iots: t.null,
-    json: { type: 'null' },
+    input: t.null,
+    output: { type: 'null' },
   },
   'converts numbers': {
-    iots: t.number,
-    json: { type: 'number' },
+    input: t.number,
+    output: { type: 'number' },
   },
   'converts integers': {
-    iots: t.Int,
-    json: { type: 'integer' },
+    input: t.Int,
+    output: { type: 'integer' },
   },
   'converts booleans': {
-    iots: t.boolean,
-    json: { type: 'boolean' },
+    input: t.boolean,
+    output: { type: 'boolean' },
   },
   'converts simple arrays': {
-    iots: t.array(t.number),
-    json: { type: 'array', items: { type: 'number' } },
+    input: t.array(t.number),
+    output: { type: 'array', items: { type: 'number' } },
   },
   'converts readonly arrays': {
-    iots: t.readonlyArray(t.number),
-    json: { type: 'array', items: { type: 'number' } },
+    input: t.readonlyArray(t.number),
+    output: { type: 'array', items: { type: 'number' } },
   },
   'converts enums': {
-    iots: t.keyof({
+    input: t.keyof({
       on: null,
       off: null,
       idle: null,
     }),
-    json: {
+    output: {
       type: 'string',
       enum: ['on', 'off', 'idle'],
     },
   },
   'converts tuples': {
-    iots: t.tuple([t.number, t.string]),
-    json: {
+    input: t.tuple([t.number, t.string]),
+    output: {
       type: 'array',
       items: [{ type: 'number' }, { type: 'string' }],
     },
   },
   'converts types objects': {
-    iots: t.type({
+    input: t.type({
       name: t.string,
       age: t.number,
     }),
-    json: {
+    output: {
       type: 'object',
       required: ['name', 'age'],
       properties: {
@@ -84,11 +84,11 @@ const transformations: Transformations = {
     },
   },
   'converts partial objects': {
-    iots: t.partial({
+    input: t.partial({
       name: t.string,
       age: t.number,
     }),
-    json: {
+    output: {
       type: 'object',
       properties: {
         name: { type: 'string' },
@@ -97,11 +97,11 @@ const transformations: Transformations = {
     },
   },
   'converts strict objects': {
-    iots: t.strict({
+    input: t.strict({
       name: t.string,
       age: t.number,
     }),
-    json: {
+    output: {
       type: 'object',
       additionalProperties: false,
       required: ['name', 'age'],
@@ -112,16 +112,16 @@ const transformations: Transformations = {
     },
   },
   'converts refinements': {
-    iots: Positive,
-    json: { type: 'number' },
+    input: Positive,
+    output: { type: 'number' },
   },
   'puts values with undefined no required': {
-    iots: t.type({
+    input: t.type({
       id: t.string,
       name: t.union([t.string, t.undefined]),
       age: t.union([t.string, t.undefined, t.number]),
     }),
-    json: {
+    output: {
       type: 'object',
       required: ['id'],
       properties: {
@@ -132,22 +132,47 @@ const transformations: Transformations = {
     },
   },
   'combines partial and type': {
-    iots: t.intersection([
+    input: t.intersection([
       t.type({ name: t.string }),
       t.partial({ age: t.number }),
     ]),
-    json: {
-      type: 'object',
-      required: ['name'],
-      properties: {
-        name: { type: 'string' },
-        age: { type: 'number' },
-      },
+    output: {
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+          },
+          required: ['name'],
+        },
+        { type: 'object', properties: { age: { type: 'number' } } },
+      ],
+    },
+  },
+  'combines partial and strict': {
+    input: t.intersection([
+      t.strict({ name: t.string }),
+      t.partial({ age: t.number }),
+    ]),
+    output: {
+      allOf: [
+        {
+          additionalProperties: false,
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+          },
+          required: ['name'],
+        },
+        { type: 'object', properties: { age: { type: 'number' } } },
+      ],
     },
   },
 };
 
-for (const [title, { iots, json }] of Object.entries(transformations)) {
+for (const [title, { input: iots, output: json }] of Object.entries(
+  transformations
+)) {
   test(title, (x) => {
     x.deepEqual(convert(iots), json);
   });

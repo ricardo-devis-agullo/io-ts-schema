@@ -9,23 +9,6 @@ function isConvertible(schema: t.Mixed): boolean {
   );
 }
 
-function isObjectSchema(
-  schema: t.Mixed
-): schema is t.PartialC<any> | t.TypeC<any> {
-  if (schema instanceof t.InterfaceType || schema instanceof t.PartialType) {
-    return true;
-  } else if (
-    schema instanceof t.ExactType ||
-    schema instanceof t.ReadonlyType
-  ) {
-    return isObjectSchema(schema.type);
-  } else if (schema instanceof t.IntersectionType) {
-    return schema.types.every(isObjectSchema);
-  }
-
-  return false;
-}
-
 function getObjectProps(props: t.Props, modifiers: Modifiers) {
   return Object.fromEntries(
     Object.entries(props)
@@ -125,11 +108,9 @@ function convertType(schema: t.Mixed, modifiers: Modifiers): JSONSchema {
       return convertType(schema.type, modifiers);
     }
   } else if (schema instanceof t.IntersectionType) {
-    if (!schema.types.every(isObjectSchema)) {
-      throw new Error(
-        `Only object types supported in intersection: ${schema.name}`
-      );
-    }
+    return {
+      allOf: schema.types.map((type: t.Mixed) => convertType(type, modifiers)),
+    };
   }
 
   throw new Error(`Invalid type ${(schema as any)._tag} - ${schema.name}`);
