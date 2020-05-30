@@ -4,7 +4,7 @@ Convert io-ts types to JSON schema
 
 ## Installation
 
-Not available yet on NPM.
+`npm install io-ts-json-schema`
 
 ## Usage
 
