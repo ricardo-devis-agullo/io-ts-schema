@@ -11,8 +11,8 @@ Convert io-ts types to JSON schema
 ```typescript
 import { convert } from 'io-ts-schema';
 
-const type = t.type({
-  name: t.string,
+const type = t.strict({
+  name: t.union([t.string, t.undefined]),
   coordinates: t.array(t.number),
   tags: t.readonlyArray(t.string),
   status: t.keyof({
@@ -32,7 +32,8 @@ const json = convert(type);
 /*
 {
     type: 'object',
-    required: ['name', 'coordinates', 'tags', 'status', 'age', 'admin', 'links'],
+    required: ['coordinates', 'tags', 'status', 'age', 'admin', 'links'],
+    additionalProperties: false,
     properties: {
       name: { type: 'string' },
       status: {
