@@ -20,7 +20,7 @@ const type = t.strict({
     off: null,
     idle: null,
   }),
-  age: t.union([t.number, t.string]),
+  age: t.union([t.Int, t.string]),
   admin: t.boolean,
   links: t.type({
     facebook: t.string,
@@ -49,7 +49,7 @@ const json = convert(type);
         items: { type: 'string' }
       },
       age: {
-        oneOf: [{ type: 'number' }, { type: 'string' }]
+        oneOf: [{ type: 'integer' }, { type: 'string' }]
       },
       admin: { type: 'boolean' },
       links: {
@@ -67,7 +67,7 @@ const json = convert(type);
 
 ## Why?
 
-You could take your types and use them on [Fastify](https://github.com/fastify/fastify) for [validation](https://www.fastify.io/docs/latest/Validation-and-Serialization/).
+You could take your types and use them on [Fastify](https://github.com/fastify/fastify) for [validation](https://www.fastify.io/docs/latest/Validation-and-Serialization/). This is useful if you have already iots types in your system and/or don't want to have a build step to generate interfaces from the JSON schemas.
 
 ## Notes
 
