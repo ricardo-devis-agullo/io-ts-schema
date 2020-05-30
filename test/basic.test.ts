@@ -6,7 +6,7 @@ import { JSONSchema } from '../src/types';
 interface Transformations {
   [testDescription: string]: {
     input: t.Mixed;
-    output: JSONSchema;
+    output: Error | JSONSchema;
   };
 }
 
@@ -179,12 +179,27 @@ const transformations: Transformations = {
       },
     },
   },
+  'throws if the intersection has anything other than objects': {
+    input: t.intersection([t.type({ name: t.string }), t.number]),
+    output: new Error(
+      'Only objects (partial, type or strict) are allowed in intersections, got NumberType'
+    ),
+  },
 };
 
-for (const [title, { input: iots, output: json }] of Object.entries(
-  transformations
-)) {
+for (const [title, { input, output }] of Object.entries(transformations)) {
   test(title, (x) => {
-    x.deepEqual(convert(iots), json);
+    if (output instanceof Error) {
+      const error = x.throws(
+        () => {
+          convert(input);
+        },
+        { instanceOf: TypeError }
+      );
+
+      x.is(error.message, output.message);
+    } else {
+      x.deepEqual(convert(input), output);
+    }
   });
 }

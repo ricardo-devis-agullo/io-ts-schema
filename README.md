@@ -76,3 +76,5 @@ You could take your types and use them on [Fastify](https://github.com/fastify/f
 ## Limitations
 
 It won't work with [custom types](https://github.com/gcanti/io-ts/blob/master/index.md#custom-types), and will work with [branded types](https://github.com/gcanti/io-ts/blob/master/index.md#branded-types--refinements), but only will take the base type (with the exception of `t.Int`).
+
+You can only add objects in intersections (t.partial, t.type and t.strict will work). Nested intersections are fine as long as its objects all the way down. It will throw with a TypeError if not.

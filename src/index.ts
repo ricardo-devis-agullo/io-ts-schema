@@ -38,8 +38,10 @@ function extractObj(type: t.Mixed, modifiers: Modifiers): ObjectSchema {
   } else if (type instanceof t.ExactType) {
     return extractObj(type.type, { ...modifiers, exact: true });
   }
-  throw new Error(
-    `Only objects (partial, type or strict) are allowed in intersections, got ${type}`
+  throw new TypeError(
+    `Only objects (partial, type or strict) are allowed in intersections, got ${
+      (type as any)._tag || type.name
+    }`
   );
 }
 
