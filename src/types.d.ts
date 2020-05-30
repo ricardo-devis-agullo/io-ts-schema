@@ -47,5 +47,6 @@ interface UnionSchema {
 }
 
 interface IntersectionSchema {
+  type: 'object';
   allOf: JSONSchema[];
 }

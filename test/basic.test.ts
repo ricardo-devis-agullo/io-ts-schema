@@ -137,6 +137,7 @@ const transformations: Transformations = {
       t.partial({ age: t.number }),
     ]),
     output: {
+      type: 'object',
       allOf: [
         {
           type: 'object',
@@ -155,6 +156,7 @@ const transformations: Transformations = {
       t.partial({ age: t.number }),
     ]),
     output: {
+      type: 'object',
       allOf: [
         {
           additionalProperties: false,

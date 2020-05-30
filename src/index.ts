@@ -109,6 +109,7 @@ function convertType(schema: t.Mixed, modifiers: Modifiers): JSONSchema {
     }
   } else if (schema instanceof t.IntersectionType) {
     return {
+      type: 'object',
       allOf: schema.types.map((type: t.Mixed) => convertType(type, modifiers)),
     };
   }
