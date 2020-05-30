@@ -32,6 +32,17 @@ function createObj(
   return obj;
 }
 
+function extractObj(type: t.Mixed, modifiers: Modifiers): ObjectSchema {
+  if (type instanceof t.PartialType || type instanceof t.InterfaceType) {
+    return createObj(type, modifiers);
+  } else if (type instanceof t.ExactType) {
+    return extractObj(type.type, { ...modifiers, exact: true });
+  }
+  throw new Error(
+    `Only objects (partial, type or strict) are allowed in intersections, got ${type}`
+  );
+}
+
 function createIntersectedObj(
   schema: t.IntersectionType<t.Mixed[]>,
   modifiers: Modifiers
@@ -40,10 +51,8 @@ function createIntersectedObj(
     .map((type: any) => {
       if (type instanceof t.IntersectionType) {
         return createIntersectedObj(type, modifiers);
-      } else if (type instanceof t.ExactType) {
-        return createObj(type.type, { ...modifiers, exact: true });
       } else {
-        return createObj(type, modifiers);
+        return extractObj(type, modifiers);
       }
     })
     .reduce(
