@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "baseUrl": ".",
     "resolveJsonModule": true,
-    "target": "esnext",
+    "target": "es5",
     "module": "commonjs",
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "noImplicitAny": true,
     "strict": true,
     "lib": ["esnext", "dom"],
+    "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "sourceMap": true
   },

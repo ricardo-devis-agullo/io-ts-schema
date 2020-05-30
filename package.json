@@ -1,12 +1,14 @@
 {
-  "name": "io-ts-json-schema",
+  "name": "io-ts-schema",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean && npm run lint",
     "build": "tsc",
+    "prepublish": "npm run build",
     "lint": "eslint src/**",
     "start": "cross-env TS_NODE_FILES=true node-dev -r ts-node/register src/index.ts",
     "test": "ava --watch"
