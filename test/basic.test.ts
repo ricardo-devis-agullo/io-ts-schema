@@ -1,5 +1,6 @@
 import * as t from 'io-ts';
-import test from 'ava';
+import { DateFromUnixTime } from 'io-ts-types/lib/DateFromUnixTime';
+import test, { Constructor } from 'ava';
 import { convert } from '../src';
 import { JSONSchema } from '../src/types';
 
@@ -185,6 +186,10 @@ const transformations: Transformations = {
       'Only objects (partial, type or strict) are allowed in intersections, got NumberType'
     ),
   },
+  'throws if trying to pass a new type': {
+    input: DateFromUnixTime,
+    output: new Error('Invalid type undefined - DateFromUnixTime'),
+  },
 };
 
 for (const [title, { input, output }] of Object.entries(transformations)) {
@@ -194,7 +199,7 @@ for (const [title, { input, output }] of Object.entries(transformations)) {
         () => {
           convert(input);
         },
-        { instanceOf: TypeError }
+        { instanceOf: output.constructor as Constructor }
       );
 
       x.is(error.message, output.message);
