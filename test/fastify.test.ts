@@ -4,26 +4,24 @@ import * as t from 'io-ts';
 import test from 'ava';
 import { isRight } from 'fp-ts/lib/Either';
 import { convert } from '../src';
+import { JSONSchema } from '../src/types';
 
-const IOTS = t.strict({ name: t.string, age: t.number });
-type IOTS = t.TypeOf<typeof IOTS>;
-const JSONSchema = convert(IOTS);
-
-const sample: IOTS = {
-  age: 35,
-  name: 'Ricardo',
+type TestData<a extends Record<string, unknown>> = {
+  title: string;
+  type: t.Type<a, unknown, t.mixed>;
+  data: a;
 };
 
-function buildFastify() {
+function buildFastify(jsonSchema: JSONSchema) {
   const app = fastify();
 
   app.route({
     method: 'POST',
     url: '/',
     schema: {
-      body: JSONSchema,
+      body: jsonSchema,
       response: {
-        200: JSONSchema,
+        200: jsonSchema,
       },
     },
     handler(request, reply) {
@@ -34,21 +32,38 @@ function buildFastify() {
   return app;
 }
 
-test('test', async (x) => {
-  const app = buildFastify();
+function apiTest<a extends Record<string, unknown>>(testData: TestData<a>) {
+  test(testData.title, async (x) => {
+    const app = buildFastify(convert(testData.type));
 
-  x.teardown(() => app.close());
+    x.teardown(() => app.close());
 
-  await app.ready();
+    await app.ready();
 
-  const response = await supertest(app.server)
-    .post('/')
-    .send(sample)
-    .set('Accept', 'application/json')
-    .expect('Content-Type', 'application/json; charset=utf-8')
-    .expect(200);
+    const response = await supertest(app.server)
+      .post('/')
+      .send(testData.data)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect(200);
 
-  const decoded = IOTS.decode(response.body);
+    const decoded = testData.type.decode(response.body);
 
-  x.true(isRight(decoded));
+    x.true(isRight(decoded));
+  });
+}
+
+apiTest({
+  title: 'converts data back and forth',
+  type: t.strict({ name: t.string, age: t.number }),
+  data: { age: 35, name: 'Ricardo' },
+});
+
+apiTest({
+  title: 'works with optional data',
+  type: t.intersection([
+    t.type({ name: t.string }),
+    t.partial({ age: t.number }),
+  ]),
+  data: { name: 'Ricardo' },
 });
