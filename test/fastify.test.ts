@@ -10,6 +10,7 @@ type TestData<a extends Record<string, unknown>> = {
   title: string;
   type: t.Type<a, unknown, t.mixed>;
   data: a;
+  only?: boolean;
 };
 
 function buildFastify(jsonSchema: JSONSchema) {
@@ -33,7 +34,9 @@ function buildFastify(jsonSchema: JSONSchema) {
 }
 
 function apiTest<a extends Record<string, unknown>>(testData: TestData<a>) {
-  test(testData.title, async (x) => {
+  const testFn = testData.only ? test.only.bind(test) : test;
+
+  testFn(testData.title, async (x) => {
     const app = buildFastify(convert(testData.type));
 
     x.teardown(() => app.close());
