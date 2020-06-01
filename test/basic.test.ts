@@ -21,32 +21,6 @@ const Positive = t.brand(
   'Positive'
 );
 
-const Metadata = t.type({
-  bitRate: t.number,
-  crc: t.string,
-  displayAspectRatio: t.string,
-  duration: t.number,
-  height: t.number,
-  mimetype: t.string,
-  size: t.number,
-  width: t.number,
-});
-
-export const Video = t.type({
-  id: t.string,
-  title: t.string,
-  created: t.number,
-  favorite: t.boolean,
-  mainSnapshot: t.number,
-  metadata: Metadata,
-  tags: t.array(t.string),
-  views: t.number,
-});
-export type Video = t.TypeOf<typeof Video>;
-
-export const Videos = t.array(Video);
-export type Videos = t.TypeOf<typeof Videos>;
-
 const transformations: Transformations = {
   'converts strings': {
     input: t.string,
@@ -203,59 +177,6 @@ const transformations: Transformations = {
 
         age: { type: 'number' },
         isAdmin: { type: 'boolean' },
-      },
-    },
-  },
-  'creates video': {
-    input: Video,
-    output: {
-      type: 'object',
-      required: [
-        'id',
-        'title',
-        'created',
-        'favorite',
-        'mainSnapshot',
-        'metadata',
-        'tags',
-        'views',
-      ],
-      properties: {
-        id: { type: 'string' },
-        title: { type: 'string' },
-        created: { type: 'number' },
-        favorite: { type: 'boolean' },
-        mainSnapshot: { type: 'number' },
-        metadata: {
-          type: 'object',
-          required: [
-            'bitRate',
-            'crc',
-            'displayAspectRatio',
-            'duration',
-            'height',
-            'mimetype',
-            'size',
-            'width',
-          ],
-          properties: {
-            bitRate: { type: 'number' },
-            crc: { type: 'string' },
-            displayAspectRatio: { type: 'string' },
-            duration: { type: 'number' },
-            height: { type: 'number' },
-            mimetype: { type: 'string' },
-            size: { type: 'number' },
-            width: { type: 'number' },
-          },
-        },
-        tags: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-        },
-        views: { type: 'number' },
       },
     },
   },
