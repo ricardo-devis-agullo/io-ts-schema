@@ -1,11 +1,12 @@
 import * as t from 'io-ts';
 import { ObjectSchema, JSONSchema } from './types';
+import * as is from './typeChecks';
 
 function isConvertible(schema: t.Mixed): boolean {
   return !(
-    schema instanceof t.UndefinedType ||
-    schema instanceof t.FunctionType ||
-    schema instanceof t.VoidType
+    is.undefinedType(schema) ||
+    is.functionType(schema) ||
+    is.voidType(schema)
   );
 }
 
@@ -26,16 +27,15 @@ function createObj(
     properties: getObjectProps(schema.props, modifiers),
   };
   if (modifiers.exact) obj.additionalProperties = false;
-  if (schema instanceof t.InterfaceType)
-    obj.required = getRequiredProps(schema.props);
+  if (is.interfaceType(schema)) obj.required = getRequiredProps(schema.props);
 
   return obj;
 }
 
 function extractObj(type: t.Mixed, modifiers: Modifiers): ObjectSchema {
-  if (type instanceof t.PartialType || type instanceof t.InterfaceType) {
+  if (is.partialType(type) || is.interfaceType(type)) {
     return createObj(type, modifiers);
-  } else if (type instanceof t.ExactType) {
+  } else if (is.exactType(type)) {
     return extractObj(type.type, { ...modifiers, exact: true });
   }
   throw new TypeError(
@@ -51,7 +51,7 @@ function createIntersectedObj(
 ) {
   const objects: ObjectSchema = schema.types
     .map((type: any) => {
-      if (type instanceof t.IntersectionType) {
+      if (is.intersectionType(type)) {
         return createIntersectedObj(type, modifiers);
       } else {
         return extractObj(type, modifiers);
@@ -80,12 +80,10 @@ function createIntersectedObj(
 function getRequiredProps(props: t.Props): string[] {
   return Object.entries(props)
     .filter(([_key, value]) => {
-      if (value instanceof t.UndefinedType) return false;
+      if (is.undefinedType(value)) return false;
       if (
-        value instanceof t.UnionType &&
-        value.types.some(
-          (innerValue: t.Mixed) => innerValue instanceof t.UndefinedType
-        )
+        is.unionType(value) &&
+        value.types.some((innerValue: t.Mixed) => is.undefinedType(innerValue))
       ) {
         return false;
       }
@@ -105,54 +103,52 @@ const initialModifiers: Modifiers = {
 };
 
 function convertType(schema: t.Mixed, modifiers: Modifiers): JSONSchema {
-  if (schema instanceof t.UnionType) {
+  if (is.unionType(schema)) {
     const convertibles = schema.types.filter(isConvertible);
     if (convertibles.length === 1) {
       return convertType(convertibles[0], modifiers);
     }
-    return { oneOf: convertibles.map(convertType) };
-  } else if (schema instanceof t.NumberType) {
+    return {
+      oneOf: convertibles.map((convertible) =>
+        convertType(convertible, modifiers)
+      ),
+    };
+  } else if (is.numberType(schema)) {
     return { type: 'number' };
-  } else if (schema instanceof t.NullType) {
+  } else if (is.nullType(schema)) {
     return { type: 'null' };
-  } else if (schema instanceof t.StringType) {
+  } else if (is.stringType(schema)) {
     return { type: 'string' };
-  } else if (schema instanceof t.BooleanType) {
+  } else if (is.booleanType(schema)) {
     return { type: 'boolean' };
-  } else if (schema instanceof t.TupleType) {
+  } else if (is.tupleType(schema)) {
     return {
       type: 'array',
       items: schema.types.map((type: t.Mixed) => convertType(type, modifiers)),
     };
-  } else if (schema instanceof t.KeyofType) {
+  } else if (is.keyOfType(schema)) {
     return {
       type: 'string',
       enum: Object.keys(schema.keys),
     };
-  } else if (
-    schema instanceof t.ArrayType ||
-    schema instanceof t.ReadonlyArrayType
-  ) {
+  } else if (is.arrayType(schema) || is.readonlyArrayType(schema)) {
     return {
       type: 'array',
       items: convertType(schema.type, initialModifiers),
     };
-  } else if (schema instanceof t.ReadonlyType) {
+  } else if (is.readonlyType(schema)) {
     return convertType(schema.type, { ...modifiers, readonly: true });
-  } else if (schema instanceof t.ExactType) {
+  } else if (is.exactType(schema)) {
     return convertType(schema.type, { ...modifiers, exact: true });
-  } else if (
-    schema instanceof t.InterfaceType ||
-    schema instanceof t.PartialType
-  ) {
+  } else if (is.interfaceType(schema) || is.partialType(schema)) {
     return createObj(schema, modifiers);
-  } else if (schema instanceof t.RefinementType) {
+  } else if (is.refinementType(schema)) {
     if (schema.name === 'Int') {
       return { type: 'integer' };
     } else {
       return convertType(schema.type, modifiers);
     }
-  } else if (schema instanceof t.IntersectionType) {
+  } else if (is.intersectionType(schema)) {
     return createIntersectedObj(schema, modifiers);
   }
 
