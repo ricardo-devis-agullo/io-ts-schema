@@ -2,7 +2,7 @@ import * as t from 'io-ts';
 import { DateFromUnixTime } from 'io-ts-types/lib/DateFromUnixTime';
 import test, { Constructor } from 'ava';
 import { convert } from '../src';
-import { JSONSchema } from '../src/types';
+import { JSONSchema } from '../src/jsonSchema';
 
 interface Transformations {
   [testDescription: string]: {

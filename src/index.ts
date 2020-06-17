@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { ObjectSchema, JSONSchema } from './types';
+import { ObjectSchema, JSONSchema } from './jsonSchema';
 import * as is from './typeChecks';
 
 function isConvertible(schema: t.Mixed): boolean {
