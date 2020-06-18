@@ -4,7 +4,7 @@ import * as t from 'io-ts';
 import test from 'ava';
 import { isRight } from 'fp-ts/lib/Either';
 import { convert } from '../src';
-import { JSONSchema } from '../src/types';
+import { JSONSchema } from '../src/jsonSchema';
 
 type TestData<a extends Record<string, unknown>> = {
   title: string;
