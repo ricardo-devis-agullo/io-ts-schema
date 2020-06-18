@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
 import { DateFromUnixTime } from 'io-ts-types/lib/DateFromUnixTime';
 import test, { Constructor } from 'ava';
-import { convert } from '../src';
+import * as io from '../src';
 import { JSONSchema } from '../src/jsonSchema';
 
 interface Transformations {
@@ -197,14 +197,14 @@ for (const [title, { input, output }] of Object.entries(transformations)) {
     if (output instanceof Error) {
       const error = x.throws(
         () => {
-          convert(input);
+          io.convert(input);
         },
         { instanceOf: output.constructor as Constructor }
       );
 
       x.is(error.message, output.message);
     } else {
-      x.deepEqual(convert(input), output);
+      x.deepEqual(io.convert(input), output);
     }
   });
 }

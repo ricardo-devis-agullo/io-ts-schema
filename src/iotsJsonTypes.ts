@@ -16,7 +16,7 @@ interface JSONString extends t.BrandC<t.StringC, JSONStringBrand> {
   jsonSchema: StringOptions;
 }
 
-export const jsonString = (
+export const string = (
   optionsOrDescription: StringOptions | string = {}
 ): JSONString => {
   const options: StringOptions =
@@ -62,7 +62,7 @@ interface JSONNumber extends t.BrandC<t.NumberC, JSONNumberBrand> {
   jsonSchema: NumberOptions;
 }
 
-export const jsonNumber = (
+export const number = (
   optionsOrDescription: NumberOptions | string = {}
 ): JSONNumber => {
   const options: NumberOptions =
@@ -112,7 +112,7 @@ interface ArrayOptions<C extends t.Mixed> extends ArrayJSONOptions {
   codec: C;
 }
 
-export function jsonArray<C extends t.Mixed>(
+export function array<C extends t.Mixed>(
   options: ArrayOptions<C>
 ): JSONArray<C> {
   const { codec, ...arrayJsonOptions } = options;
