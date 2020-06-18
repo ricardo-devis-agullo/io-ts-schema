@@ -1,10 +1,6 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
-interface JSONStringBrand {
-  readonly JSONString: unique symbol;
-}
-
 interface StringOptions {
   readonly description?: string;
   readonly minLength?: number;
@@ -12,9 +8,9 @@ interface StringOptions {
   readonly pattern?: string;
 }
 
-export interface JSONString extends t.BrandC<t.StringC, JSONStringBrand> {
+export type JSONString = t.Type<string, string, unknown> & {
   jsonSchema: StringOptions;
-}
+};
 
 export const string = (
   optionsOrDescription: StringOptions | string = {}
@@ -23,31 +19,25 @@ export const string = (
     typeof optionsOrDescription === 'string'
       ? { description: optionsOrDescription }
       : optionsOrDescription;
+  const { minLength = -1, maxLength = Infinity, pattern = '.*' } = options;
 
   return Object.assign(
-    t.brand(
-      t.string,
-      (n): n is t.Branded<string, JSONStringBrand> => {
-        const {
-          minLength = -1,
-          maxLength = Infinity,
-          pattern = '.*',
-        } = options;
-        return (
-          n.length >= minLength &&
-          n.length <= maxLength &&
-          new RegExp(pattern).test(n)
-        );
-      },
-      'JSONString'
+    new t.Type<string, string, unknown>(
+      'JSONString',
+      (u): u is string => typeof u === 'string',
+      (u, c) =>
+        either.chain(t.string.validate(u, c), (as) => {
+          return as.length >= minLength &&
+            as.length <= maxLength &&
+            new RegExp(pattern).test(as)
+            ? t.success(as)
+            : t.failure(u, c);
+        }),
+      (nea) => nea
     ),
     { jsonSchema: options }
   );
 };
-
-interface JSONNumberBrand {
-  readonly JSONNumber: unique symbol;
-}
 
 interface NumberOptions {
   readonly description?: string;
@@ -58,9 +48,9 @@ interface NumberOptions {
   readonly exclusiveMaximum?: number;
 }
 
-export interface JSONNumber extends t.BrandC<t.NumberC, JSONNumberBrand> {
-  jsonSchema: NumberOptions;
-}
+export type JSONNumber = t.Type<number, number, unknown> & {
+  jsonSchema: StringOptions;
+};
 
 export const number = (
   optionsOrDescription: NumberOptions | string = {}
@@ -69,28 +59,29 @@ export const number = (
     typeof optionsOrDescription === 'string'
       ? { description: optionsOrDescription }
       : optionsOrDescription;
+  const {
+    multipleOf = 1,
+    minimum = -Infinity,
+    exclusiveMinimum = -Infinity,
+    maximum = Infinity,
+    exclusiveMaximum = Infinity,
+  } = options;
 
   return Object.assign(
-    t.brand(
-      t.number,
-      (n): n is t.Branded<number, JSONNumberBrand> => {
-        const {
-          multipleOf = 1,
-          minimum = -Infinity,
-          exclusiveMinimum = -Infinity,
-          maximum = Infinity,
-          exclusiveMaximum = Infinity,
-        } = options;
-
-        return (
-          n % multipleOf === 0 &&
-          n >= minimum &&
-          n > exclusiveMinimum &&
-          n <= maximum &&
-          n < exclusiveMaximum
-        );
-      },
-      'JSONNumber'
+    new t.Type(
+      'JSONNumber',
+      (u): u is number => typeof u === 'number',
+      (u, c) =>
+        either.chain(t.number.validate(u, c), (as) => {
+          return as % multipleOf === 0 &&
+            as >= minimum &&
+            as > exclusiveMinimum &&
+            as <= maximum &&
+            as < exclusiveMaximum
+            ? t.success(as)
+            : t.failure(u, c);
+        }),
+      (nea) => nea
     ),
     { jsonSchema: options }
   );
