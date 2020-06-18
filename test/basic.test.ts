@@ -1,13 +1,14 @@
 import * as t from 'io-ts';
 import { DateFromUnixTime } from 'io-ts-types/lib/DateFromUnixTime';
 import test, { Constructor } from 'ava';
-import { convert } from '../src';
-import { JSONSchema } from '../src/types';
+import * as io from '../src';
+import { JSONSchema } from '../src/jsonSchema';
 
 interface Transformations {
   [testDescription: string]: {
     input: t.Mixed;
     output: Error | JSONSchema;
+    only?: boolean;
   };
 }
 
@@ -22,6 +23,88 @@ const Positive = t.brand(
 );
 
 const transformations: Transformations = {
+  'converts custom string': {
+    input: io.string(),
+    output: {
+      type: 'string',
+    },
+  },
+  'converts custom string with description': {
+    input: io.string('Simple description'),
+    output: {
+      description: 'Simple description',
+      type: 'string',
+    },
+  },
+  'converts custom string with options': {
+    input: io.string({
+      description: 'Long description',
+      maxLength: 10,
+      minLength: 5,
+      pattern: '.+',
+    }),
+    output: {
+      description: 'Long description',
+      maxLength: 10,
+      minLength: 5,
+      pattern: '.+',
+      type: 'string',
+    },
+  },
+  'converts custom number': {
+    input: io.number(),
+    output: {
+      type: 'number',
+    },
+  },
+  'converts custom number with description': {
+    input: io.number('Simple description'),
+    output: {
+      description: 'Simple description',
+      type: 'number',
+    },
+  },
+  'converts custom number with options': {
+    input: io.number({
+      description: 'Long description',
+      minimum: 5,
+      maximum: 10,
+    }),
+    output: {
+      description: 'Long description',
+      minimum: 5,
+      maximum: 10,
+      type: 'number',
+    },
+  },
+  'converts custom number with exclusive options': {
+    input: io.number({
+      description: 'Long description',
+      exclusiveMinimum: 5,
+      exclusiveMaximum: 10,
+    }),
+    output: {
+      description: 'Long description',
+      exclusiveMinimum: 5,
+      exclusiveMaximum: 10,
+      type: 'number',
+    },
+  },
+  'converts custom arrays': {
+    input: io.array({
+      codec: t.number,
+      description: 'Array description',
+      minItems: 5,
+      maxItems: 10,
+    }),
+    output: {
+      type: 'array',
+      description: 'Array description',
+      minItems: 5,
+      maxItems: 10,
+      items: { type: 'number' },
+    },
+  },
   'converts strings': {
     input: t.string,
     output: {
@@ -192,19 +275,23 @@ const transformations: Transformations = {
   },
 };
 
-for (const [title, { input, output }] of Object.entries(transformations)) {
-  test(title, (x) => {
+for (const [title, { input, output, only }] of Object.entries(
+  transformations
+)) {
+  const testFn = only ? test.only.bind(test) : test;
+
+  testFn(title, (x) => {
     if (output instanceof Error) {
       const error = x.throws(
         () => {
-          convert(input);
+          io.convert(input);
         },
         { instanceOf: output.constructor as Constructor }
       );
 
       x.is(error.message, output.message);
     } else {
-      x.deepEqual(convert(input), output);
+      x.deepEqual(io.convert(input), output);
     }
   });
 }

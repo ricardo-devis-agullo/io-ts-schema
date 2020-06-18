@@ -20,6 +20,11 @@ interface NullSchema {
 }
 
 interface NumberSchema {
+  description?: string;
+  minimum?: number;
+  maximum?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
   type: 'number';
 }
 
@@ -28,6 +33,10 @@ interface IntegerSchema {
 }
 
 interface StringSchema {
+  description?: string;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
   type: 'string';
   enum?: string[];
 }
@@ -37,6 +46,9 @@ interface BooleanSchema {
 }
 
 interface ArraySchema {
+  description?: string;
+  minItems?: number;
+  maxItems?: number;
   type: 'array';
   items: JSONSchema | JSONSchema[];
 }
