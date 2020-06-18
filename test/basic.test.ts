@@ -90,6 +90,21 @@ const transformations: Transformations = {
       type: 'number',
     },
   },
+  'converts custom arrays': {
+    input: io.array({
+      codec: t.number,
+      description: 'Array description',
+      minItems: 5,
+      maxItems: 10,
+    }),
+    output: {
+      type: 'array',
+      description: 'Array description',
+      minItems: 5,
+      maxItems: 10,
+      items: { type: 'number' },
+    },
+  },
   'converts strings': {
     input: t.string,
     output: {

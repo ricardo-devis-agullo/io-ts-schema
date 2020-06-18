@@ -107,6 +107,12 @@ function convertType(schema: t.Mixed, modifiers: Modifiers): JSONSchema {
     return { type: 'string', ...schema.jsonSchema };
   } else if (is.jsonNumberType(schema)) {
     return { type: 'number', ...schema.jsonSchema };
+  } else if (is.jsonArrayType(schema)) {
+    return {
+      type: 'array',
+      items: convertType(schema.type, initialModifiers),
+      ...schema.jsonSchema,
+    };
   } else if (is.unionType(schema)) {
     const convertibles = schema.types.filter(isConvertible);
     if (convertibles.length === 1) {

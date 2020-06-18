@@ -46,6 +46,9 @@ interface BooleanSchema {
 }
 
 interface ArraySchema {
+  description?: string;
+  minItems?: number;
+  maxItems?: number;
   type: 'array';
   items: JSONSchema | JSONSchema[];
 }

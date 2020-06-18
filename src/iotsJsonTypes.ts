@@ -100,7 +100,7 @@ export type JSONArray<C extends t.Mixed = t.UnknownC> = t.Type<
   Array<t.TypeOf<C>>,
   Array<t.OutputOf<C>>,
   unknown
-> & { jsonSchema: ArrayJSONOptions };
+> & { jsonSchema: ArrayJSONOptions; type: C };
 
 interface ArrayJSONOptions {
   description?: string;
@@ -130,6 +130,6 @@ export function array<C extends t.Mixed>(
         }),
       (nea) => arr.encode(nea)
     ),
-    { jsonSchema: arrayJsonOptions }
+    { jsonSchema: arrayJsonOptions, type: codec }
   );
 }
