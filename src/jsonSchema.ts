@@ -20,6 +20,11 @@ interface NullSchema {
 }
 
 interface NumberSchema {
+  description?: string;
+  minimum?: number;
+  maximum?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
   type: 'number';
 }
 
@@ -28,6 +33,10 @@ interface IntegerSchema {
 }
 
 interface StringSchema {
+  description?: string;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
   type: 'string';
   enum?: string[];
 }

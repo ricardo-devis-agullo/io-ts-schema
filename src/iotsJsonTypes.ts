@@ -12,7 +12,7 @@ interface StringOptions {
   readonly pattern?: string;
 }
 
-interface JSONString extends t.BrandC<t.StringC, JSONStringBrand> {
+export interface JSONString extends t.BrandC<t.StringC, JSONStringBrand> {
   jsonSchema: StringOptions;
 }
 
@@ -58,7 +58,7 @@ interface NumberOptions {
   readonly exclusiveMaximum?: number;
 }
 
-interface JSONNumber extends t.BrandC<t.NumberC, JSONNumberBrand> {
+export interface JSONNumber extends t.BrandC<t.NumberC, JSONNumberBrand> {
   jsonSchema: NumberOptions;
 }
 
@@ -96,7 +96,7 @@ export const number = (
   );
 };
 
-export type JSONArray<C extends t.Mixed> = t.Type<
+export type JSONArray<C extends t.Mixed = t.UnknownC> = t.Type<
   Array<t.TypeOf<C>>,
   Array<t.OutputOf<C>>,
   unknown
@@ -120,7 +120,7 @@ export function array<C extends t.Mixed>(
   const arr = t.array(codec);
   return Object.assign(
     new t.Type(
-      `JSONArray<${codec.name}`,
+      `JSONArray<${codec.name}>`,
       (u): u is Array<t.TypeOf<C>> => arr.is(u),
       (u, c) =>
         either.chain(arr.validate(u, c), (as) => {

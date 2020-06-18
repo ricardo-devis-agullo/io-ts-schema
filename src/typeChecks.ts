@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { JSONString, JSONNumber, JSONArray } from './iotsJsonTypes';
 
 export function numberType(x: t.Mixed): x is t.NumberType {
   return (x as any)._tag === 'NumberType';
@@ -80,4 +81,16 @@ export function functionType(x: t.Mixed): x is t.FunctionType {
 
 export function voidType(x: t.Mixed): x is t.VoidType {
   return (x as any)._tag === 'VoidType';
+}
+
+export function jsonStringType(x: t.Mixed): x is JSONString {
+  return x.name === 'JSONString';
+}
+
+export function jsonNumberType(x: t.Mixed): x is JSONNumber {
+  return x.name === 'JSONNumber';
+}
+
+export function jsonArrayType(x: t.Mixed): x is JSONArray {
+  return !!x.name.match(/^JSONArray<\w+>$/);
 }

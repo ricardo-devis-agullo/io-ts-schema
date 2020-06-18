@@ -103,7 +103,11 @@ const initialModifiers: Modifiers = {
 };
 
 function convertType(schema: t.Mixed, modifiers: Modifiers): JSONSchema {
-  if (is.unionType(schema)) {
+  if (is.jsonStringType(schema)) {
+    return { type: 'string', ...schema.jsonSchema };
+  } else if (is.jsonNumberType(schema)) {
+    return { type: 'number', ...schema.jsonSchema };
+  } else if (is.unionType(schema)) {
     const convertibles = schema.types.filter(isConvertible);
     if (convertibles.length === 1) {
       return convertType(convertibles[0], modifiers);
